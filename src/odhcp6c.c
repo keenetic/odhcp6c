@@ -180,7 +180,7 @@ int main(_unused int argc, char* const argv[])
 	int sol_timeout = DHCPV6_SOL_MAX_RT;
 	int verbosity = 0;
 	bool help = false, daemonize = false;
-	int logopt = LOG_PID;
+	int logopt = 0;
 	int c, res;
 	unsigned int client_options = DHCPV6_CLIENT_FQDN | DHCPV6_ACCEPT_RECONFIGURE;
 	unsigned int ra_options = RA_RDNSS_DEFAULT_LIFETIME;
@@ -420,13 +420,15 @@ int main(_unused int argc, char* const argv[])
 	}
 
 	if (daemonize) {
-		openlog("odhcp6c", LOG_PID, LOG_DAEMON); // Disable LOG_PERROR
+		openlog("odhcp6c", 0, LOG_DAEMON); // Disable LOG_PERROR
 		if (daemon(0, 0)) {
 			syslog(LOG_ERR, "Failed to daemonize: %s",
 					strerror(errno));
 			return 4;
 		}
+	}
 
+	{
 		if (!pidfile) {
 			snprintf((char*)buf, sizeof(buf), "/var/run/odhcp6c.%s.pid", ifname);
 			pidfile = (char*)buf;
