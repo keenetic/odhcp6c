@@ -48,6 +48,8 @@
 #define IFF_LOWER_UP 0x10000
 #endif
 
+#define MAX_RS_INTERVAL_SEC 30
+
 static bool nocarrier = false;
 static bool ptp_link = false;
 
@@ -232,8 +234,14 @@ static void ra_send_rs(_o_unused int signal)
 	if (sendto(sock, &rs, len, MSG_DONTWAIT, (struct sockaddr*)&dest, sizeof(dest)) < 0)
 		error("Failed to send RS (%s)",  strerror(errno));
 
-	if (++rs_attempt <= 3)
-		alarm(4);
+	size_t pause = ++rs_attempt * 3;
+
+	if( pause > MAX_RS_INTERVAL_SEC )
+	{
+		pause = MAX_RS_INTERVAL_SEC;
+	}
+
+	alarm(pause);
 }
 
 static int16_t pref_to_priority(uint8_t flags)
