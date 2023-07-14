@@ -462,6 +462,8 @@ static void dhcpv6_send(enum dhcpv6_msg type, uint8_t trid[3], uint32_t ecs)
 					ia_pd_len += ex_len - 5;
 				}
 
+				hdr->t1 = htonl(e[j].t1);
+				hdr->t2 = htonl(e[j].t2);
 				hdr->len = htons(ntohs(hdr->len) + ntohs(p.len) + 4U);
 			}
 		}
@@ -488,6 +490,8 @@ static void dhcpv6_send(enum dhcpv6_msg type, uint8_t trid[3], uint32_t ecs)
 		if (type == DHCPV6_MSG_REQUEST) {
 			pa[i].preferred = htonl(e[i].preferred);
 			pa[i].valid = htonl(e[i].valid);
+			hdr_ia_na.t1 = htonl(e[i].t1);
+			hdr_ia_na.t2 = htonl(e[i].t2);
 		} else {
 			pa[i].preferred = 0;
 			pa[i].valid = 0;
