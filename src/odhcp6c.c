@@ -531,8 +531,6 @@ int main(_o_unused int argc, char* const argv[])
 					strerror(errno));
 			return 3;
 		}
-	} else {
-		config_dhcp->log_syslog = false;
 	}
 
 	{

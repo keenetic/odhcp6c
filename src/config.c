@@ -78,6 +78,7 @@ struct config_dhcp *config_dhcp_get(void) {
 
 void config_dhcp_reset(void) {
 	config_dhcp.log_level = LOG_WARNING;
+	config_dhcp.log_syslog = true;
 	config_dhcp.release = true;
 	config_dhcp.dscp = 0;
 	config_dhcp.sk_prio = 0;
