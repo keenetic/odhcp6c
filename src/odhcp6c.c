@@ -232,7 +232,7 @@ int main(_o_unused int argc, char* const argv[])
 	struct odhcp6c_opt *opt;
 	int ia_pd_iaid_index = 0;
 	bool help = false, daemonize = false;
-	int logopt = LOG_PID;
+	int logopt = 0;
 	int c;
 	int res = -1;
 	unsigned int ra_options = RA_RDNSS_DEFAULT_LIFETIME;
@@ -525,13 +525,17 @@ int main(_o_unused int argc, char* const argv[])
 	signal(SIGUSR2, sighandler);
 
 	if (daemonize) {
-		openlog("odhcp6c", LOG_PID, LOG_DAEMON); // Disable LOG_PERROR
+		openlog("odhcp6c", 0, LOG_DAEMON); // Disable LOG_PERROR
 		if (daemon(0, 0)) {
 			error("Failed to daemonize: %s",
 					strerror(errno));
 			return 3;
 		}
+	} else {
+		config_dhcp->log_syslog = false;
+	}
 
+	{
 		if (!pidfile) {
 			snprintf((char*)buf, sizeof(buf), "/var/run/odhcp6c.%s.pid", ifname);
 			pidfile = (char*)buf;
@@ -550,8 +554,6 @@ int main(_o_unused int argc, char* const argv[])
 				close(pidfd);
 			}
 		}
-	} else {
-		config_dhcp->log_syslog = false;
 	}
 
 	if (deprecated_opt)
