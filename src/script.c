@@ -45,6 +45,7 @@ static char *argv[4] = {NULL, NULL, action, NULL};
 static volatile pid_t running = 0;
 static time_t started;
 
+/*
 static void script_sighandle(int signal)
 {
 	if (signal == SIGCHLD) {
@@ -55,12 +56,13 @@ static void script_sighandle(int signal)
 				running = 0;
 	}
 }
+*/
 
 int script_init(const char *path, const char *ifname)
 {
 	argv[0] = (char*)path;
 	argv[1] = (char*)ifname;
-	signal(SIGCHLD, script_sighandle);
+	signal(SIGCHLD, SIG_DFL);
 
 	return 0;
 }
@@ -481,6 +483,20 @@ void script_call(const char *status, int delay, bool resume)
 		if (!resume)
 			action[0] = 0;
 
+		while (1) {
+			const pid_t res = waitpid(pid, NULL, 0);
+
+			if (res < 0) {
+				if (errno == EINTR)
+					continue;
+
+				error("Failed to wait for the script handler to finish: %s", strerror(errno));
+			}
+
+			running = 0;
+
+			break;
+		}
 	} else if (pid == 0) {
 		size_t dns_len, search_len, custom_len, sntp_ip_len, ntp_ip_len, ntp_dns_len;
 		size_t sip_ip_len, sip_fqdn_len, aftr_name_len, addr_len;
@@ -489,7 +505,7 @@ void script_call(const char *status, int delay, bool resume)
 
 		signal(SIGTERM, SIG_DFL);
 		if (delay > 0) {
-			sleep(delay);
+			// sleep(delay);
 			odhcp6c_expire(false);
 		}
 
